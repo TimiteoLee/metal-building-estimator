@@ -58,7 +58,7 @@ interface ConfiguratorState {
 export const useConfiguratorStore = create<ConfiguratorState>()(
   persist(
     immer((set, get) => ({
-      config: { ...DEFAULT_BUILDING_CONFIG } as BuildingConfig,
+      config: { ...DEFAULT_BUILDING_CONFIG },
       currentStep: 'building_type' as WizardStep,
       completedSteps: new Set<WizardStep>(),
       pricing: null,
@@ -210,7 +210,7 @@ export const useConfiguratorStore = create<ConfiguratorState>()(
       // Reset
       resetConfig: () => {
         set((state) => {
-          state.config = { ...DEFAULT_BUILDING_CONFIG } as BuildingConfig
+          state.config = { ...DEFAULT_BUILDING_CONFIG }
           state.currentStep = 'building_type'
           state.completedSteps = new Set()
           state.pricing = null

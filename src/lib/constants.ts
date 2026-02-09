@@ -1,4 +1,4 @@
-import type { ColorOption, BuildingCategory, WallType, DoorType, RoofStyle, RoofPitch, Gauge, BraceType, TrussType, InstallationSurface } from '@/types/building'
+import type { ColorOption, BuildingCategory, BuildingConfig, WallType, DoorType, RoofStyle, RoofPitch, Gauge, BraceType, TrussType, InstallationSurface } from '@/types/building'
 
 // ── Color Palettes ──────────────────────────────────────────
 
@@ -146,11 +146,11 @@ export const DEFAULT_WALL_CONFIG = {
 export const DEFAULT_LEAN_TO = { enabled: false as const }
 
 export const DEFAULT_BUILDING_CONFIG = {
-  category: 'metal_building' as BuildingCategory,
+  category: 'metal_building',
   styleId: '',
   styleName: '',
   dimensions: { width: 20, length: 21, legHeight: 9 },
-  roof: { style: 'a_frame' as RoofStyle, pitch: '4/12' as RoofPitch, overhang: '0"' as const },
+  roof: { style: 'a_frame', pitch: '4/12', overhang: '0"' },
   colors: { roof: 'old-town-gray', trim: 'white', siding: 'light-stone' },
   walls: {
     front: { ...DEFAULT_WALL_CONFIG },
@@ -161,11 +161,11 @@ export const DEFAULT_BUILDING_CONFIG = {
   doors: [],
   leftLeanTo: DEFAULT_LEAN_TO,
   rightLeanTo: DEFAULT_LEAN_TO,
-  gauge: '14' as Gauge,
-  brace: 'standard' as BraceType,
-  trusses: 'standard' as TrussType,
-  installationSurface: 'concrete' as InstallationSurface,
-}
+  gauge: '14',
+  brace: 'standard',
+  trusses: 'standard',
+  installationSurface: 'concrete',
+} satisfies BuildingConfig
 
 // ── Max constraints ─────────────────────────────────────────
 

@@ -4,10 +4,7 @@ import { useState } from 'react'
 import { useConfiguratorStore } from '@/store/configurator-store'
 import { ROOF_COLORS, TRIM_COLORS, SIDING_COLORS } from '@/lib/constants'
 import { Button } from '@/components/ui/Button'
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
-}
+import { formatCurrency } from '@/lib/format'
 
 function getColorName(id: string, colors: { id: string; name: string }[]): string {
   return colors.find((c) => c.id === id)?.name || id
@@ -27,8 +24,10 @@ export function ReviewStep() {
   })
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async () => {
+    setError('')
     setSubmitting(true)
     try {
       const res = await fetch('/api/quote', {
@@ -40,11 +39,14 @@ export function ReviewStep() {
           screenshotUrls: [],
         }),
       })
-      if (res.ok) {
-        setSubmitted(true)
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: 'Submission failed' }))
+        setError(errData.error || 'Submission failed. Please try again.')
+        return
       }
+      setSubmitted(true)
     } catch {
-      // Error handling — save attempted anyway
+      setError('Failed to submit quote. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -245,6 +247,12 @@ export function ReviewStep() {
           </div>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       <div className="flex justify-between">
         <Button variant="secondary" onClick={prevStep}>Back</Button>

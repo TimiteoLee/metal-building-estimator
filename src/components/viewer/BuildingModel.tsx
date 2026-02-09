@@ -3,11 +3,17 @@
 import { useMemo } from 'react'
 import { useConfiguratorStore } from '@/store/configurator-store'
 import { ROOF_COLORS, SIDING_COLORS, TRIM_COLORS } from '@/lib/constants'
-import * as THREE from 'three'
-import { useFrame } from '@react-three/fiber'
+import { DoubleSide } from 'three'
 
 function findColorHex(id: string, palette: { id: string; hex: string }[]): string {
   return palette.find((c) => c.id === id)?.hex || '#888888'
+}
+
+const PITCH_MAP: Record<string, number> = {
+  '3/12': Math.atan(3 / 12),
+  '4/12': Math.atan(4 / 12),
+  '5/12': Math.atan(5 / 12),
+  '6/12': Math.atan(6 / 12),
 }
 
 function WallPanel({
@@ -48,7 +54,7 @@ function RoofPanel({
   return (
     <mesh position={position} rotation={rotation} castShadow>
       <planeGeometry args={size} />
-      <meshStandardMaterial color={color} side={THREE.DoubleSide} />
+      <meshStandardMaterial color={color} side={DoubleSide} />
     </mesh>
   )
 }
@@ -112,31 +118,47 @@ function LeanToModel({
 }
 
 export function BuildingModel() {
-  const config = useConfiguratorStore((s) => s.config)
+  const dimensions = useConfiguratorStore((s) => s.config.dimensions)
+  const roof = useConfiguratorStore((s) => s.config.roof)
+  const colors = useConfiguratorStore((s) => s.config.colors)
+  const walls = useConfiguratorStore((s) => s.config.walls)
+  const doors = useConfiguratorStore((s) => s.config.doors)
+  const leftLeanTo = useConfiguratorStore((s) => s.config.leftLeanTo)
+  const rightLeanTo = useConfiguratorStore((s) => s.config.rightLeanTo)
 
-  // Trigger re-render on state changes
-  useFrame(() => {
-    // frameloop="demand" means this only fires when invalidate() is called
-  })
-
-  const { width, length, legHeight } = config.dimensions
-  const roofColorHex = findColorHex(config.colors.roof, ROOF_COLORS)
-  const sidingColorHex = findColorHex(config.colors.siding, SIDING_COLORS)
-  const trimColorHex = findColorHex(config.colors.trim, TRIM_COLORS)
+  const { width, length, legHeight } = dimensions
+  const roofColorHex = findColorHex(colors.roof, ROOF_COLORS)
+  const sidingColorHex = findColorHex(colors.siding, SIDING_COLORS)
+  const trimColorHex = findColorHex(colors.trim, TRIM_COLORS)
 
   // Roof pitch angle
-  const pitchMap: Record<string, number> = {
-    '3/12': Math.atan(3 / 12),
-    '4/12': Math.atan(4 / 12),
-    '5/12': Math.atan(5 / 12),
-    '6/12': Math.atan(6 / 12),
-  }
-  const pitchAngle = pitchMap[config.roof.pitch] || Math.atan(4 / 12)
+  const pitchAngle = PITCH_MAP[roof.pitch] || Math.atan(4 / 12)
   const ridgeHeight = (width / 2) * Math.tan(pitchAngle)
   const roofHypotenuse = (width / 2) / Math.cos(pitchAngle)
 
   // Center the building at origin
   const wallThickness = 0.15
+
+  // Steel frame posts
+  const posts = useMemo(() => {
+    const result: JSX.Element[] = []
+    const postSpacing = 5
+    const postCountZ = Math.max(2, Math.floor(length / postSpacing) + 1)
+
+    for (let i = 0; i < postCountZ; i++) {
+      const z = -length / 2 + i * (length / (postCountZ - 1))
+      // Left and right posts
+      for (const x of [-width / 2, width / 2]) {
+        result.push(
+          <mesh key={`post-${x}-${z}`} position={[x, legHeight / 2, z]}>
+            <boxGeometry args={[0.3, legHeight, 0.3]} />
+            <meshStandardMaterial color="#666" metalness={0.5} roughness={0.5} />
+          </mesh>,
+        )
+      }
+    }
+    return result
+  }, [width, length, legHeight])
 
   return (
     <group>
@@ -146,28 +168,28 @@ export function BuildingModel() {
         position={[0, legHeight / 2, length / 2]}
         size={[width, legHeight, wallThickness]}
         color={sidingColorHex}
-        wallType={config.walls.front.type}
+        wallType={walls.front.type}
       />
       {/* Back wall */}
       <WallPanel
         position={[0, legHeight / 2, -length / 2]}
         size={[width, legHeight, wallThickness]}
         color={sidingColorHex}
-        wallType={config.walls.back.type}
+        wallType={walls.back.type}
       />
       {/* Left wall */}
       <WallPanel
         position={[-width / 2, legHeight / 2, 0]}
         size={[wallThickness, legHeight, length]}
         color={sidingColorHex}
-        wallType={config.walls.left.type}
+        wallType={walls.left.type}
       />
       {/* Right wall */}
       <WallPanel
         position={[width / 2, legHeight / 2, 0]}
         size={[wallThickness, legHeight, length]}
         color={sidingColorHex}
-        wallType={config.walls.right.type}
+        wallType={walls.right.type}
       />
 
       {/* Roof — two panels meeting at ridge */}
@@ -204,7 +226,7 @@ export function BuildingModel() {
       ))}
 
       {/* Door indicators */}
-      {config.doors.map((door) => {
+      {doors.map((door) => {
         const wallPositions: Record<string, { pos: [number, number, number]; rotY: number }> = {
           front: { pos: [0, 0, length / 2 + 0.08], rotY: 0 },
           back: { pos: [0, 0, -length / 2 - 0.08], rotY: 0 },
@@ -226,49 +248,31 @@ export function BuildingModel() {
       })}
 
       {/* Lean-tos */}
-      {config.leftLeanTo.enabled && (
+      {leftLeanTo.enabled && (
         <LeanToModel
           side="left"
           mainWidth={width}
 
           mainLegHeight={legHeight}
-          leanTo={config.leftLeanTo}
+          leanTo={leftLeanTo}
           sidingColor={sidingColorHex}
           roofColor={roofColorHex}
         />
       )}
-      {config.rightLeanTo.enabled && (
+      {rightLeanTo.enabled && (
         <LeanToModel
           side="right"
           mainWidth={width}
 
           mainLegHeight={legHeight}
-          leanTo={config.rightLeanTo}
+          leanTo={rightLeanTo}
           sidingColor={sidingColorHex}
           roofColor={roofColorHex}
         />
       )}
 
       {/* Steel frame posts */}
-      {useMemo(() => {
-        const posts: JSX.Element[] = []
-        const postSpacing = 5
-        const postCountZ = Math.max(2, Math.floor(length / postSpacing) + 1)
-
-        for (let i = 0; i < postCountZ; i++) {
-          const z = -length / 2 + i * (length / (postCountZ - 1))
-          // Left and right posts
-          for (const x of [-width / 2, width / 2]) {
-            posts.push(
-              <mesh key={`post-${x}-${z}`} position={[x, legHeight / 2, z]}>
-                <boxGeometry args={[0.3, legHeight, 0.3]} />
-                <meshStandardMaterial color="#666" metalness={0.5} roughness={0.5} />
-              </mesh>,
-            )
-          }
-        }
-        return posts
-      }, [width, length, legHeight])}
+      {posts}
     </group>
   )
 }

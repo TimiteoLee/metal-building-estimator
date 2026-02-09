@@ -14,6 +14,7 @@ import { DoorsStep } from './steps/DoorsStep'
 import { LeanToStep } from './steps/LeanToStep'
 import { OptionsStep } from './steps/OptionsStep'
 import { ReviewStep } from './steps/ReviewStep'
+import type { WizardStep } from '@/types/building'
 import dynamic from 'next/dynamic'
 
 const BuildingViewer = dynamic(
@@ -34,7 +35,7 @@ function ViewerPlaceholder() {
   )
 }
 
-const STEP_COMPONENTS: Record<string, React.ComponentType> = {
+const STEP_COMPONENTS: Record<WizardStep, React.ComponentType> = {
   building_type: BuildingTypeStep,
   style: StyleStep,
   dimensions: DimensionsStep,

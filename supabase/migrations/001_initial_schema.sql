@@ -66,15 +66,15 @@ CREATE TABLE configurations (
   delivery_region TEXT,
   config_data JSONB NOT NULL,
   pricing_snapshot JSONB,
-  building_estimate DECIMAL(10,2),
-  material_surcharge DECIMAL(10,2),
-  subtotal DECIMAL(10,2),
-  tax_rate DECIMAL(5,4),
-  total_tax DECIMAL(10,2),
-  total DECIMAL(10,2),
-  deposit_percent DECIMAL(5,2) DEFAULT 10,
-  deposit_amount DECIMAL(10,2),
-  balance_due DECIMAL(10,2),
+  building_estimate DECIMAL(10,2) NOT NULL,
+  material_surcharge DECIMAL(10,2) NOT NULL DEFAULT 0,
+  subtotal DECIMAL(10,2) NOT NULL,
+  tax_rate DECIMAL(5,4) NOT NULL DEFAULT 0,
+  total_tax DECIMAL(10,2) NOT NULL DEFAULT 0,
+  total DECIMAL(10,2) NOT NULL,
+  deposit_percent DECIMAL(5,2) NOT NULL DEFAULT 10,
+  deposit_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  balance_due DECIMAL(10,2) NOT NULL DEFAULT 0,
   additional_comments TEXT,
   screenshot_urls TEXT[],
   pdf_url TEXT,
@@ -101,7 +101,7 @@ CREATE TABLE admin_settings (
 -- Indexes
 CREATE INDEX idx_configurations_status ON configurations(status);
 CREATE INDEX idx_configurations_created ON configurations(created_at DESC);
-CREATE INDEX idx_configurations_quote_number ON configurations(quote_number);
+-- NOTE: No index needed on configurations(quote_number) — UNIQUE constraint creates one.
 CREATE INDEX idx_pricing_options_category ON pricing_options(category);
 CREATE INDEX idx_building_styles_category ON building_styles(category);
 
@@ -125,17 +125,51 @@ CREATE POLICY "Anyone can read admin_settings" ON admin_settings FOR SELECT USIN
 -- Anyone can insert configurations (customer submissions)
 CREATE POLICY "Anyone can insert configurations" ON configurations FOR INSERT WITH CHECK (true);
 
--- Configurations readable by quote_number (for shareable links)
-CREATE POLICY "Anyone can read configurations by quote_number" ON configurations FOR SELECT USING (true);
+-- TODO: Replace this open SELECT policy with an RPC function that returns only
+-- non-PII columns (config_data, pricing_snapshot, building_estimate, etc.) filtered
+-- by quote_number. Postgres RLS cannot restrict columns, so use a security-definer
+-- view or function to hide customer_name, customer_email, customer_phone.
+CREATE POLICY "Public read configurations"
+  ON configurations FOR SELECT USING (true);
 
--- Admin write policies (requires authenticated user)
-CREATE POLICY "Authenticated users can update building_styles" ON building_styles FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users can update pricing_options" ON pricing_options FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users can update lean_to_pricing" ON lean_to_pricing FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users can update wall_options" ON wall_options FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users can update door_options" ON door_options FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users can update configurations" ON configurations FOR UPDATE USING (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users can update admin_settings" ON admin_settings FOR ALL USING (auth.role() = 'authenticated');
+-- Admin write policies (requires admin role in JWT custom claims)
+CREATE POLICY "Admins can manage building_styles"
+  ON building_styles FOR ALL USING (auth.jwt() ->> 'user_role' = 'admin');
+CREATE POLICY "Admins can manage pricing_options"
+  ON pricing_options FOR ALL USING (auth.jwt() ->> 'user_role' = 'admin');
+CREATE POLICY "Admins can manage lean_to_pricing"
+  ON lean_to_pricing FOR ALL USING (auth.jwt() ->> 'user_role' = 'admin');
+CREATE POLICY "Admins can manage wall_options"
+  ON wall_options FOR ALL USING (auth.jwt() ->> 'user_role' = 'admin');
+CREATE POLICY "Admins can manage door_options"
+  ON door_options FOR ALL USING (auth.jwt() ->> 'user_role' = 'admin');
+CREATE POLICY "Admins can update configurations"
+  ON configurations FOR UPDATE USING (auth.jwt() ->> 'user_role' = 'admin');
+CREATE POLICY "Admins can manage admin_settings"
+  ON admin_settings FOR ALL USING (auth.jwt() ->> 'user_role' = 'admin');
+
+-- Singleton constraint: ensure only one row in admin_settings.
+-- We add a column that is always TRUE and put a UNIQUE constraint on it.
+ALTER TABLE admin_settings ADD COLUMN is_singleton BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE admin_settings ADD CONSTRAINT admin_settings_singleton UNIQUE (is_singleton);
+ALTER TABLE admin_settings ADD CONSTRAINT admin_settings_singleton_check CHECK (is_singleton = TRUE);
+
+-- Auto-update updated_at on row modification
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_configurations_updated_at
+  BEFORE UPDATE ON configurations
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_admin_settings_updated_at
+  BEFORE UPDATE ON admin_settings
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- Insert default admin settings
 INSERT INTO admin_settings (company_name, default_tax_rate, default_deposit_percent, material_surcharge_percent)

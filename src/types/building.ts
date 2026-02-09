@@ -144,25 +144,6 @@ export interface CustomerInfo {
   additionalComments: string
 }
 
-export interface QuoteSubmission {
-  config: BuildingConfig
-  customer: CustomerInfo
-  screenshotUrls: string[]
-}
-
-export interface SavedQuote {
-  id: string
-  quoteNumber: string
-  config: BuildingConfig
-  pricing: PricingBreakdown
-  customer: CustomerInfo
-  screenshotUrls: string[]
-  pdfUrl: string | null
-  status: 'draft' | 'submitted' | 'contacted' | 'won' | 'lost'
-  createdAt: string
-  updatedAt: string
-}
-
 // ── Building Style (from DB) ────────────────────────────────
 
 export interface BuildingStyle {
@@ -172,56 +153,6 @@ export interface BuildingStyle {
   basePrices: Record<string, number>  // "12x20" -> 1800
   availableOptions?: Record<string, string[]>
   sortOrder: number
-}
-
-// ── Pricing option (from DB) ────────────────────────────────
-
-export interface PricingOption {
-  id: string
-  category: string
-  name: string
-  priceModifier: number
-  priceType: 'flat' | 'per_sqft' | 'per_linear_ft'
-  metadata?: Record<string, unknown>
-  sortOrder: number
-}
-
-// ── Door option (from DB) ───────────────────────────────────
-
-export interface DoorOption {
-  id: string
-  type: DoorType
-  name: string
-  widthFt: number
-  heightFt: number
-  price: number
-}
-
-// ── Wall option (from DB) ───────────────────────────────────
-
-export interface WallOption {
-  id: string
-  name: string
-  applicablePositions: WallPosition[]
-  sidingStyles: SidingDirection[]
-  basePrice: number
-  priceType: string
-  sortOrder: number
-}
-
-// ── Admin settings (from DB) ────────────────────────────────
-
-export interface AdminSettings {
-  id: string
-  companyName: string
-  companyLogoUrl: string | null
-  companyPhone: string | null
-  companyEmail: string | null
-  companyAddress: string | null
-  defaultTaxRate: number
-  defaultDepositPercent: number
-  materialSurchargePercent: number
-  notificationEmail: string | null
 }
 
 // ── Wizard state ────────────────────────────────────────────

@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer'
 import type { BuildingConfig, PricingBreakdown, CustomerInfo } from '@/types/building'
+import { formatCurrency } from '@/lib/format'
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10 },
@@ -22,10 +23,6 @@ const styles = StyleSheet.create({
   customerLabel: { fontSize: 9, color: '#666', marginBottom: 2 },
   customerValue: { fontSize: 11, fontWeight: 'bold', marginBottom: 8 },
 })
-
-function formatCurrency(amount: number): string {
-  return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-}
 
 interface ProposalDocumentProps {
   quoteNumber: string

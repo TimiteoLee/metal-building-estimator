@@ -13,9 +13,6 @@ export default function HomePage() {
             <Link href="/configure" className="text-sm text-gray-600 hover:text-gray-900">
               Design Your Building
             </Link>
-            <Link href="/admin/login" className="text-sm text-gray-500 hover:text-gray-700">
-              Admin
-            </Link>
           </nav>
         </div>
       </header>

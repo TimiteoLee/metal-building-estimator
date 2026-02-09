@@ -17,7 +17,7 @@ interface PricingData {
 function lookupBasePrice(style: BuildingStyle | undefined, width: number, length: number): number {
   if (!style) return 0
   const key = `${width}x${length}`
-  if (style.basePrices[key]) return style.basePrices[key]
+  if (style.basePrices[key] !== undefined) return style.basePrices[key]
   // Find closest match by area
   const targetArea = width * length
   let closest = ''
@@ -144,7 +144,90 @@ export function calculatePricing(config: BuildingConfig, data: PricingData): Pri
 
 // Default pricing data for when Supabase is not connected
 export const DEFAULT_PRICING_DATA: PricingData = {
-  styles: [],
+  styles: [
+    {
+      id: 'step-down-barn',
+      name: 'Step Down Barn',
+      category: 'metal_building',
+      basePrices: {
+        '12x20': 1800, '12x21': 1890, '15x20': 2340, '15x21': 2460,
+        '18x20': 2700, '18x21': 2835, '20x20': 3000, '20x21': 3150,
+        '20x25': 3750, '20x30': 4500, '24x25': 4500, '24x30': 5400,
+        '24x35': 6300, '24x40': 7200, '30x30': 6750, '30x35': 7875,
+        '30x40': 9000, '30x50': 11250,
+      },
+      sortOrder: 1,
+    },
+    {
+      id: 'regular-barn',
+      name: 'Regular Barn',
+      category: 'metal_building',
+      basePrices: {
+        '12x20': 1680, '12x21': 1764, '15x20': 2100, '15x21': 2205,
+        '18x20': 2520, '18x21': 2646, '20x20': 2800, '20x21': 2940,
+        '20x25': 3500, '20x30': 4200, '24x25': 4200, '24x30': 5040,
+        '24x35': 5880, '24x40': 6720, '30x30': 6300, '30x35': 7350,
+        '30x40': 8400, '30x50': 10500,
+      },
+      sortOrder: 2,
+    },
+    {
+      id: 'a-frame-vertical',
+      name: 'A-Frame Vertical',
+      category: 'metal_building',
+      basePrices: {
+        '12x20': 1920, '12x21': 2016, '15x20': 2400, '15x21': 2520,
+        '18x20': 2880, '18x21': 3024, '20x20': 3200, '20x21': 3360,
+        '20x25': 4000, '20x30': 4800, '24x25': 4800, '24x30': 5760,
+        '24x35': 6720, '24x40': 7680, '30x30': 7200, '30x35': 8400,
+        '30x40': 9600, '30x50': 12000,
+      },
+      sortOrder: 3,
+    },
+    {
+      id: 'regular-style',
+      name: 'Regular Style',
+      category: 'carport',
+      basePrices: {
+        '12x20': 1200, '12x21': 1260, '15x20': 1500, '15x21': 1575,
+        '18x20': 1800, '18x21': 1890, '20x20': 2000, '20x21': 2100,
+        '24x25': 3000, '24x30': 3600, '30x30': 4500, '30x40': 6000,
+      },
+      sortOrder: 1,
+    },
+    {
+      id: 'a-frame-carport',
+      name: 'A-Frame Carport',
+      category: 'carport',
+      basePrices: {
+        '12x20': 1440, '12x21': 1512, '15x20': 1800, '15x21': 1890,
+        '18x20': 2160, '18x21': 2268, '20x20': 2400, '20x21': 2520,
+        '24x25': 3600, '24x30': 4320, '30x30': 5400, '30x40': 7200,
+      },
+      sortOrder: 2,
+    },
+    {
+      id: 'post-frame-barn',
+      name: 'Post Frame Barn',
+      category: 'post_frame',
+      basePrices: {
+        '20x20': 4500, '20x30': 6750, '24x30': 8100, '24x40': 10800,
+        '30x30': 10125, '30x40': 13500, '30x50': 16875, '40x40': 18000,
+        '40x60': 27000,
+      },
+      sortOrder: 1,
+    },
+    {
+      id: 'garden-shed',
+      name: 'Garden Shed',
+      category: 'shed',
+      basePrices: {
+        '8x10': 1200, '8x12': 1440, '10x10': 1500, '10x12': 1800,
+        '10x16': 2400, '12x12': 2160, '12x16': 2880, '12x20': 3600,
+      },
+      sortOrder: 1,
+    },
+  ],
   materialSurchargePercent: 0.15,
   taxRate: 0.06,
   depositPercent: 0.10,
@@ -171,11 +254,19 @@ export const DEFAULT_PRICING_DATA: PricingData = {
   trussPremium: 400,
   connectionFee: 120,
   leanToPrices: {
-    '10x21': 1390,
+    '8x20': 1100,
+    '8x21': 1155,
     '10x20': 1350,
-    '12x21': 1590,
+    '10x21': 1390,
+    '10x25': 1600,
+    '10x30': 1900,
     '12x20': 1540,
-    '15x21': 1890,
+    '12x21': 1590,
+    '12x25': 1850,
+    '12x30': 2200,
     '15x20': 1840,
+    '15x21': 1890,
+    '15x25': 2250,
+    '15x30': 2700,
   },
 }
