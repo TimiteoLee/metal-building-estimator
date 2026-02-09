@@ -3,6 +3,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
+import { enableMapSet } from 'immer'
+
+enableMapSet()
 import type {
   BuildingCategory, BuildingConfig, WallConfig, DoorPlacement,
   LeanToConfig, RoofConfig, ColorConfig, Gauge, BraceType,
