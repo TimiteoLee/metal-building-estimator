@@ -69,7 +69,7 @@ export function ConfiguratorLayout() {
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left sidebar — steps + pricing */}
-        <aside className="w-72 bg-white border-r border-gray-200 flex flex-col overflow-y-auto flex-shrink-0">
+        <aside className="w-60 bg-white border-r border-gray-200 flex flex-col overflow-y-auto flex-shrink-0">
           <div className="p-4 flex-1">
             <StepSidebar />
           </div>
@@ -78,21 +78,20 @@ export function ConfiguratorLayout() {
           </div>
         </aside>
 
-        {/* Center — step form */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-6 min-w-0">
-          <div className="max-w-2xl">
-            {StepComponent && <StepComponent />}
+        {/* Right area — form on top-left, viewer on top-right */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* 3D viewer — top half */}
+          <div className="h-[45%] bg-gray-100 border-b border-gray-200 flex-shrink-0">
+            <BuildingViewer />
           </div>
-        </main>
 
-        {/* Right — 3D viewer (sticky so it stays visible while scrolling) */}
-        <aside className="w-[480px] bg-gray-100 border-l border-gray-200 flex-shrink-0 relative">
-          <div className="sticky top-0 h-screen p-4">
-            <div className="w-full h-full rounded-lg overflow-hidden">
-              <BuildingViewer />
+          {/* Step form — bottom half, scrollable */}
+          <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
+            <div className="max-w-2xl mx-auto">
+              {StepComponent && <StepComponent />}
             </div>
-          </div>
-        </aside>
+          </main>
+        </div>
       </div>
     </div>
   )

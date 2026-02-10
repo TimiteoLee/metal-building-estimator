@@ -160,8 +160,11 @@ export function BuildingModel() {
     return result
   }, [width, length, legHeight])
 
+  // Scale down so building fits nicely in viewport (feet → display units)
+  const scale = 0.3
+
   return (
-    <group>
+    <group scale={[scale, scale, scale]}>
       {/* Main building walls */}
       {/* Front wall */}
       <WallPanel

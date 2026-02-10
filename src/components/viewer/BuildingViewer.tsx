@@ -8,7 +8,7 @@ import { BuildingModel } from './BuildingModel'
 export function BuildingViewer() {
   return (
     <Canvas
-      camera={{ position: [40, 25, 40], fov: 50 }}
+      camera={{ position: [12, 8, 12], fov: 50 }}
       shadows
       gl={{ preserveDrawingBuffer: true, antialias: true }}
       frameloop="demand"
@@ -21,17 +21,18 @@ export function BuildingViewer() {
         <ContactShadows
           position={[0, -0.01, 0]}
           opacity={0.3}
-          scale={80}
+          scale={30}
           blur={2}
-          far={20}
+          far={10}
         />
         <Environment preset="city" />
         <OrbitControls
           enablePan
           enableZoom
           enableRotate
-          minDistance={10}
-          maxDistance={100}
+          target={[0, 2, 0]}
+          minDistance={5}
+          maxDistance={40}
           maxPolarAngle={Math.PI / 2.1}
         />
         {/* Ground plane */}
