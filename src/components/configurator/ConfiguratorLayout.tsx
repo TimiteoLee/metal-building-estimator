@@ -66,27 +66,24 @@ export function ConfiguratorLayout() {
         <span className="text-sm text-gray-500">Building Configurator</span>
       </header>
 
-      {/* Main content — 30/70 split */}
+      {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left 30% — steps, form, and pricing */}
-        <div className="w-[30%] flex flex-col overflow-hidden border-r border-gray-200 flex-shrink-0">
-          {/* Step sidebar */}
-          <div className="bg-white border-b border-gray-200 px-4 py-3 overflow-x-auto flex-shrink-0">
-            <StepSidebar horizontal />
+        {/* Left sidebar — steps + pricing */}
+        <aside className="w-52 bg-white border-r border-gray-200 flex flex-col overflow-y-auto flex-shrink-0">
+          <div className="p-3 flex-1">
+            <StepSidebar />
           </div>
-
-          {/* Step form — scrollable */}
-          <main className="flex-1 overflow-y-auto bg-gray-50 p-5">
-            {StepComponent && <StepComponent />}
-          </main>
-
-          {/* Pricing — pinned to bottom */}
-          <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
+          <div className="p-3 border-t border-gray-200">
             <PricingDisplay />
           </div>
-        </div>
+        </aside>
 
-        {/* Right 70% — 3D viewer */}
+        {/* Center — step form (scrollable) */}
+        <main className="w-[28%] overflow-y-auto bg-gray-50 p-5 border-r border-gray-200 flex-shrink-0">
+          {StepComponent && <StepComponent />}
+        </main>
+
+        {/* Right ~70% — 3D viewer */}
         <div className="flex-1 bg-gray-100">
           <BuildingViewer />
         </div>
