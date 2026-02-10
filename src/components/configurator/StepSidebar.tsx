@@ -3,10 +3,46 @@
 import { useConfiguratorStore } from '@/store/configurator-store'
 import { WIZARD_STEPS, STEP_LABELS, type WizardStep } from '@/types/building'
 
-export function StepSidebar() {
+export function StepSidebar({ horizontal }: { horizontal?: boolean }) {
   const currentStep = useConfiguratorStore((s) => s.currentStep)
   const completedSteps = useConfiguratorStore((s) => s.completedSteps)
   const goToStep = useConfiguratorStore((s) => s.goToStep)
+
+  if (horizontal) {
+    return (
+      <nav className="flex items-center gap-1 min-w-0">
+        {WIZARD_STEPS.map((step, index) => {
+          const isCurrent = step === currentStep
+          const isCompleted = completedSteps.has(step)
+          const canNavigate = isCompleted || isCurrent
+
+          return (
+            <button
+              key={step}
+              onClick={() => canNavigate && goToStep(step)}
+              disabled={!canNavigate}
+              title={STEP_LABELS[step as WizardStep]}
+              className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                isCurrent
+                  ? 'bg-blue-600 text-white'
+                  : isCompleted
+                    ? 'bg-green-500 text-white cursor-pointer'
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isCompleted ? (
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                index + 1
+              )}
+            </button>
+          )
+        })}
+      </nav>
+    )
+  }
 
   return (
     <nav className="space-y-1">
