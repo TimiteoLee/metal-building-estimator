@@ -8,7 +8,7 @@ import { BuildingModel } from './BuildingModel'
 export function BuildingViewer() {
   return (
     <Canvas
-      camera={{ position: [30, 20, 30], fov: 45 }}
+      camera={{ position: [40, 25, 40], fov: 50 }}
       shadows
       gl={{ preserveDrawingBuffer: true, antialias: true }}
       frameloop="demand"

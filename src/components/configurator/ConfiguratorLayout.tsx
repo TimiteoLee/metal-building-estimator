@@ -85,10 +85,12 @@ export function ConfiguratorLayout() {
           </div>
         </main>
 
-        {/* Right — 3D viewer */}
-        <aside className="w-[480px] bg-gray-100 border-l border-gray-200 flex-shrink-0 p-4">
-          <div className="w-full h-full rounded-lg overflow-hidden">
-            <BuildingViewer />
+        {/* Right — 3D viewer (sticky so it stays visible while scrolling) */}
+        <aside className="w-[480px] bg-gray-100 border-l border-gray-200 flex-shrink-0 relative">
+          <div className="sticky top-0 h-screen p-4">
+            <div className="w-full h-full rounded-lg overflow-hidden">
+              <BuildingViewer />
+            </div>
           </div>
         </aside>
       </div>
